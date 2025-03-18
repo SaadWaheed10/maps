@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
-import {View, Text, TextInput, Button, StyleSheet, Alert} from 'react-native';
+import {View, Text, TextInput, Button, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {styles} from './styles';
 
 export default function LoginScreen({navigation}: any) {
   const [email, setEmail] = useState('');
@@ -54,26 +55,3 @@ export default function LoginScreen({navigation}: any) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  input: {
-    width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingLeft: 10,
-    marginBottom: 15,
-  },
-});

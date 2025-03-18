@@ -1,20 +1,31 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, TouchableOpacity, Text} from 'react-native';
+import {View, TouchableOpacity, Text} from 'react-native';
 import MapView, {LatLng, Polygon} from 'react-native-maps';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {area} from '@turf/turf';
 import {polygon} from '@turf/helpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {MenuModal, NameModal, SavedAreasModal} from '../components/Modals';
+import {
+  MenuModal,
+  NameModal,
+  SavedAreasModal,
+} from '../../components/Modal/Modals';
+import {styles} from './styles';
 
-export default function HomeScreen({savedShapes}: {savedShapes: any}) {
+interface Shape {
+  name: string;
+  areaSF: number;
+  coordinates: LatLng[];
+}
+
+export default function HomeScreen({savedShapes = []}: {savedShapes?: any}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [savedAreasModalVisible, setSavedAreasModalVisible] = useState(false);
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [polygonCoordinates, setPolygonCoordinates] = useState<LatLng[]>([]);
-  const [shapes, setShapes] = useState(savedShapes || []);
+  const [shapes, setShapes] = useState<Shape[]>(savedShapes || []);
   const [shapeName, setShapeName] = useState('');
   const [selectedShape, setSelectedShape] = useState<{
     name: string;
@@ -70,6 +81,18 @@ export default function HomeScreen({savedShapes}: {savedShapes: any}) {
       } catch (error) {
         console.error('Error saving shapes:', error);
       }
+    }
+  };
+
+  const handleDeleteShape = async (index: number) => {
+    try {
+      const updatedShapes = shapes.filter((_: any, i: number) => i !== index);
+      console.log('Updated Shapes:', updatedShapes);
+      setShapes(updatedShapes);
+
+      await AsyncStorage.setItem('savedShapes', JSON.stringify(updatedShapes));
+    } catch (error) {
+      console.error('Error deleting shape:', error);
     }
   };
 
@@ -146,7 +169,9 @@ export default function HomeScreen({savedShapes}: {savedShapes: any}) {
           shapes={shapes}
           selectedShape={selectedShape}
           onSelectShape={setSelectedShape}
+          onDeleteShape={handleDeleteShape}
         />
+
         <NameModal
           visible={nameModalVisible}
           shapeName={shapeName}
@@ -157,105 +182,3 @@ export default function HomeScreen({savedShapes}: {savedShapes: any}) {
     </GestureHandlerRootView>
   );
 }
-const styles = StyleSheet.create({
-  container: {flex: 1},
-  map: {flex: 1},
-  modalContainer: {
-    position: 'absolute',
-    bottom: '40%',
-    left: '10%',
-    right: '10%',
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-  },
-  savedAreasModalContainer: {
-    position: 'absolute',
-    bottom: '30%',
-    left: '10%',
-    right: '10%',
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-  },
-  nameModalContainer: {
-    position: 'absolute',
-    bottom: '40%',
-    left: '10%',
-    right: '10%',
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-  },
-  listItem: {fontSize: 18, paddingVertical: 5},
-  finishButton: {
-    position: 'absolute',
-    bottom: 50,
-    left: '40%',
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 10,
-  },
-  iconButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    padding: 10,
-  },
-  savedAreasButton: {
-    position: 'absolute',
-    top: 55,
-    left: 20,
-    backgroundColor: 'red',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-  },
-  buttonText: {color: 'white', fontSize: 16},
-  inputLabel: {fontSize: 16, marginBottom: 5},
-  input: {
-    borderWidth: 1,
-    borderColor: 'gray',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  listItemContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  listItemTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  listItemText: {
-    fontSize: 16,
-    color: 'gray',
-  },
-  selectedAreaContainer: {
-    position: 'relative',
-    top: 400,
-    left: 200,
-    padding: 5,
-    borderRadius: 5,
-    elevation: 3,
-  },
-  selectedAreaName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  resetButton: {
-    position: 'absolute',
-    top: 110, // Adjust positioning as needed
-    left: 20,
-    backgroundColor: 'red',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-  },
-});
